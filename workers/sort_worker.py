@@ -3,10 +3,6 @@ from PyQt6.QtCore import QThread, pyqtSignal
 
 
 class SortWorker(QThread):
-    """
-    Worker thread chạy thuật toán sắp xếp trên luồng nền (non-blocking).
-    Kế thừa từ QThread để tích hợp với vòng lặp sự kiện PyQt6.
-    """
     
     # Định nghĩa các signal theo yêu cầu
     progress_updated = pyqtSignal(int, int, float)   # (comparisons, swaps, elapsed_time)
@@ -15,14 +11,7 @@ class SortWorker(QThread):
     cancelled = pyqtSignal(str)                   # (name)
 
     def __init__(self, sort_class, input_array, delay=0, progress_interval=1000):
-        """
-        Khởi tạo Worker.
         
-        :param sort_class: Lớp thuật toán sắp xếp (ví dụ: BubbleSort, QuickSort).
-        :param input_array: Danh sách cần sắp xếp.
-        :param delay: Thời gian chờ giữa các bước cập nhật tiến độ (giây).
-        :param progress_interval: Số bước/tác vụ tối thiểu giữa các lần emit signal tiến độ.
-        """
         super().__init__()
         self.sort_class = sort_class
         self.input_array = input_array
@@ -30,10 +19,7 @@ class SortWorker(QThread):
         self.progress_interval = progress_interval
 
     def run(self):
-        """
-        Phương thức chính được gọi khi thread khởi động (start).
-        Chứa logic chạy thuật toán và xử lý signal.
-        """
+      
         # 1. Lấy thời gian bắt đầu
         start_time = time.perf_counter()
         algorithm_name = self.sort_class.__name__
@@ -90,7 +76,5 @@ class SortWorker(QThread):
             self.error_occurred.emit(algorithm_name, str(e))
 
     def cancel(self):
-        """
-        Phương thức để yêu cầu dừng worker một cách graceful.
-        """
+       
         self.requestInterruption()
