@@ -10,11 +10,12 @@ class SortWorker(QThread):
     error_occurred = pyqtSignal(str, str)            # (name, error_message)
     cancelled = pyqtSignal(str)                   # (name)
 
-    def __init__(self, sort_class, input_array, delay=0, progress_interval=1000):
+    def __init__(self, sort_class, input_array, algorithm_name=None, delay=0, progress_interval=1000, parent=None):
         
         super().__init__()
         self.sort_class = sort_class
-        self.input_array = input_array
+        self.input_array = input_array.copy()
+        self.algorithm_name = algorithm_name or sort_class.__name__
         self.delay = delay
         self.progress_interval = progress_interval
 
@@ -22,13 +23,13 @@ class SortWorker(QThread):
       
         # 1. Lấy thời gian bắt đầu
         start_time = time.perf_counter()
-        algorithm_name = self.sort_class.__name__
+        algorithm_name = self.algorithm_name
 
         # 2. Emit trạng thái khởi tạo (0%)
         self.progress_updated.emit(0, 0, 0.0)
 
         # 3. Định nghĩa hàm callback để cập nhật tiến độ ra bên ngoài luồng
-        def emit_progress(comparisons, swaps):
+        def emit_progress(comparisons: int, swaps: int):
             # Tính thời gian trôi qua
             current_elapsed = time.perf_counter() - start_time
             
