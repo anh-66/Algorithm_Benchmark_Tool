@@ -23,6 +23,7 @@ from ui.control_panel import ControlPanel
 from ui.styles import ALGORITHM_COLORS
 from utils.data_generator import generate_array
 from workers.sort_worker import SortWorker
+from ui.result_dialog import ResultsDialog
 
 
 class MainWindow(QMainWindow):
@@ -56,6 +57,7 @@ class MainWindow(QMainWindow):
         self.panels: Dict[str, AlgorithmPanel] = {}
         self.workers: Dict[str, SortWorker] = {}
         self.completed_count = 0
+        self.benchmark_results: Dict[str, dict] = {}
 
         self._build_ui()
 
@@ -72,6 +74,7 @@ class MainWindow(QMainWindow):
         self._generate_data(size, distribution, show_message=False)
 
         self.completed_count = 0
+        self.benchmark_results.clear()  #xóa kết quả cũ
         self.control_panel.set_running(True)
         distribution_label = self._distribution_label(distribution)
         self.statusBar().showMessage(
@@ -176,7 +179,12 @@ class MainWindow(QMainWindow):
         # LƯu số liệu cuối cùng từ worker hoàn thành thành công.
 
         del sorted_array
-        del algorithm_name, comparisons, swaps, elapsed_time
+        #lưu lại thay vì del hết
+        self.benchmark_results[algorithm_name] = {
+            "comparisons": comparisons,
+            "swaps": swaps,
+            "elapsed_time": elapsed_time,
+        }
         self._mark_worker_completed()
 
     def _handle_worker_error(self, algorithm_name: str, message: str) -> None:
@@ -204,6 +212,16 @@ class MainWindow(QMainWindow):
 
         self.control_panel.set_running(False)
         self.statusBar().showMessage("Đã hoàn tất so sánh.", 4000)
+
+        # hiển thị bảng kết quả nếu có đủ dữ liệu 
+        if self.benchmark_results:
+            dialog = ResultsDialog(
+                results=self.benchmark_results,
+                size=self.current_size or 0,
+                distribution_label=self._distribution_label(self.current_distribution),
+                parent=self,
+            )
+            dialog.exec()
 
     def _cleanup_worker(self, algorithm_name: str) -> None:
         # Ngắt kết nối tín hiệu và xóa worker sau khi luồng hoàn tất.

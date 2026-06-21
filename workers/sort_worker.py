@@ -59,6 +59,8 @@ class SortWorker(QThread):
             # Tính tổng thời gian hoàn thành
             elapsed_time = time.perf_counter() - start_time
 
+            self.progress_updated.emit(sorter.comparisons, sorter.swaps, elapsed_time) 
+
             # Emit kết quả thành công
             self.result_ready.emit(
                 algorithm_name, 
