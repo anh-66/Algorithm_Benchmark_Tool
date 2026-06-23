@@ -37,7 +37,6 @@ class BaseSort(ABC, Generic[T]):
         Returns:
             -1 nếu ``array[i] < array[j]``, 0 nếu bằng, và 1 nếu lớn hơn.
         """
-
         self.comparisons += 1
         self._record_operation()
         return self._compare_raw(self.array[i], self.array[j])
